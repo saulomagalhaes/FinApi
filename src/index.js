@@ -47,6 +47,27 @@ app.get('/statement', verifyIfExistsAccountCPF, (request, response) => {
   return response.json(customer.statement);
 });
 
-app.listen(3333);
 
+app.post('/deposit',verifyIfExistsAccountCPF, (request, response) => {
+
+  const { amount, description } = request.body;
+
+  const { customer } = request;
+
+  const statemantOperation = {
+    description: description,
+    amount: amount,
+    creat_at: new Date(),
+    type:"credit",
+  }
+
+  customer.statement.push(statemantOperation);
+
+  return response.status(201).send();
+  
+})
+
+
+
+app.listen(3333);
 //MIDDLEWARES - interceptadores, ficam no meio campo entre a requisicao e a resposta
