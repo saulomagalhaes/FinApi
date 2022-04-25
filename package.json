@@ -1,0 +1,18 @@
+{
+  "name": "FinApi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:saulomagalhaes/FinApi.git",
+  "author": "Saulo Magalhães <saulo.magalhaes@outlook.com.br>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "uuid": "^8.3.2"
+  }
+}
