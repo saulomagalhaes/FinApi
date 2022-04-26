@@ -20,6 +20,16 @@ function verifyIfExistsAccountCPF(request, response, next) {
 
   return next();
 }
+//Functions
+function getBalance(statement) {
+  const balance = statement.reduce((acc, operation) => {
+    if (operation.type === 'credit') {
+      return acc + operation.amount;
+    }
+    return acc - operation.amount;
+  }, 0);
+  return balance;
+}
 
 app.post('/account', (request, response) => {
   const { cpf, name } = request.body;
@@ -47,9 +57,7 @@ app.get('/statement', verifyIfExistsAccountCPF, (request, response) => {
   return response.json(customer.statement);
 });
 
-
-app.post('/deposit',verifyIfExistsAccountCPF, (request, response) => {
-
+app.post('/deposit', verifyIfExistsAccountCPF, (request, response) => {
   const { amount, description } = request.body;
 
   const { customer } = request;
@@ -58,16 +66,48 @@ app.post('/deposit',verifyIfExistsAccountCPF, (request, response) => {
     description: description,
     amount: amount,
     creat_at: new Date(),
-    type:"credit",
-  }
+    type: 'credit',
+  };
 
   customer.statement.push(statemantOperation);
 
   return response.status(201).send();
-  
-})
+});
 
+app.post('/withdraw', verifyIfExistsAccountCPF, (request, response) => {
+  const { amount } = request.body;
+  const { customer } = request;
 
+  const balance = getBalance(customer.statement);
+
+  if (balance < amount) {
+    return response.status(400).json({ error: 'Insufficient funds' });
+  }
+
+  const statemantOperation = {
+    amount: amount,
+    creat_at: new Date(),
+    type: 'debit',
+  };
+
+  customer.statement.push(statemantOperation);
+
+  return response.status(201).send();
+});
+
+app.get('/statement/date', verifyIfExistsAccountCPF, (request, response) => {
+  const { customer } = request;
+  const { date } = request.query;
+
+  const dateFormat = new Date(date + ' 00:00');
+
+  const statement = customer.statement.filter(
+    (statement) =>
+      statement.creat_at.toDateString() === new Date(dateFormat).toDateString()
+  );
+
+  return response.json(statement);
+});
 
 app.listen(3333);
 //MIDDLEWARES - interceptadores, ficam no meio campo entre a requisicao e a resposta
